@@ -1,0 +1,25 @@
+{
+  "nextId": 6,
+  "accounts": [
+    {
+      "id": 1,
+      "name": "Vinicio Miranda Covalski",
+      "balance": 5000
+    },
+    {
+      "id": 3,
+      "name": "Vinicio",
+      "balance": 200
+    },
+    {
+      "id": 4,
+      "name": "Vinicio",
+      "balance": 0
+    },
+    {
+      "id": 5,
+      "name": "Vinicio",
+      "balance": 0
+    }
+  ]
+}
