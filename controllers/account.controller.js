@@ -1,13 +1,7 @@
-import express from "express";
 import { promises as fs } from "fs";
-
-import cors from "cors";
-
-const router = express.Router();
 const { readFile, writeFile } = fs;
 
-
-router.post("/", async (req, res, next) => {
+async function createAccount(req, res, next) {
   try {
     let account = req.body;
 
@@ -32,9 +26,9 @@ router.post("/", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}
 
-router.get("/", cors(), async (req, res, next) => {
+async function getAccounts(req, res, next) {
   try {
     const data = JSON.parse(await readFile(global.filename));
     delete data.nextId;
@@ -43,9 +37,9 @@ router.get("/", cors(), async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}
 
-router.get("/:id", async (req, res, next) => {
+async function getAccountsId(req, res, next) {
   try {
     const data = JSON.parse(await readFile(global.filename));
     const account = data.accounts.find(
@@ -56,9 +50,9 @@ router.get("/:id", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}
 
-router.delete("/:id", async (req, res, next) => {
+async function deleteAccount(req, res, next) {
   try {
     const data = JSON.parse(await readFile(global.filename));
     data.accounts = data.accounts.filter(
@@ -71,9 +65,9 @@ router.delete("/:id", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}
 
-router.put("/", async (req, res, next) => {
+async function updateAccount(req, res, next) {
   try {
     const account = req.body;
     const data = JSON.parse(await readFile(global.filename));
@@ -98,9 +92,9 @@ router.put("/", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}
 
-router.patch("/updateBalance", async (req, res, next) => {
+async function updateBalance(req, res, next){
   try {
     const account = req.body;
     const data = JSON.parse(await readFile(global.filename));
@@ -123,11 +117,14 @@ router.patch("/updateBalance", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}
 
-router.use((err, req, res, next) => {
-  global.loggers.error(`${req.method} ${req.baseUrl} - ${err.message}`);
-  res.status(400).send({ error: err.message });
-});
 
-export default router;
+export default {
+  createAccount,
+  getAccounts,
+  getAccountsId,
+  deleteAccount,
+  updateAccount,
+  updateBalance
+};
