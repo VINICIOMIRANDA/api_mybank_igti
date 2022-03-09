@@ -1,27 +1,14 @@
-import { promises as fs } from "fs";
-const { readFile, writeFile } = fs;
+import AccountService from "../services/account.service.js";
+
 
 async function createAccount(req, res, next) {
   try {
     let account = req.body;
-
     if (!account.name || account.balance == null) {
       throw new Error("Name e Balance são obrigatórios");
     }
-    const data = JSON.parse(await readFile(global.filename));
-
-    account = {
-      id: data.nextId++,
-      name: account.name,
-      balance: account.balance,
-    };
-
-    data.accounts.push(account);
-
-    await writeFile(global.filename, JSON.stringify(data, null, 2)); // sobreescreve
-    // await writeFile("accounts.json", JSON.stringify(data);
-
-    global.loggers.info(`${req.method} ${JSON.stringify(account)}`);
+    account = await AccountService.createAccount(account);
+    loggers.info(`${req.method} ${JSON.stringify(account)}`);
     res.send(account);
   } catch (err) {
     next(err);
@@ -30,9 +17,7 @@ async function createAccount(req, res, next) {
 
 async function getAccounts(req, res, next) {
   try {
-    const data = JSON.parse(await readFile(global.filename));
-    delete data.nextId;
-    res.send(data);
+    res.send(await AccountService.getAccounts());
     global.loggers.info(`${req.method} ${req.baseUrl}`);
   } catch (err) {
     next(err);
@@ -41,11 +26,8 @@ async function getAccounts(req, res, next) {
 
 async function getAccountsId(req, res, next) {
   try {
-    const data = JSON.parse(await readFile(global.filename));
-    const account = data.accounts.find(
-      (account) => account.id === parseInt(req.params.id)
-    );
-    res.send(account);
+   
+    res.send(await AccountService.getAccountsId(req.params.id));
     global.loggers.info(`${req.method} ${req.baseUrl}`);
   } catch (err) {
     next(err);
@@ -54,12 +36,7 @@ async function getAccountsId(req, res, next) {
 
 async function deleteAccount(req, res, next) {
   try {
-    const data = JSON.parse(await readFile(global.filename));
-    data.accounts = data.accounts.filter(
-      (account) => account.id !== parseInt(req.params.id)
-    );
-
-    await writeFile(global.filename, JSON.stringify(data, null, 2));
+    await AccountService.deleteAccount(req.params.id)
     res.end();
     global.loggers.info(`${req.method} ${req.baseUrl} :id ${req.params.id}`);
   } catch (err) {
@@ -70,55 +47,30 @@ async function deleteAccount(req, res, next) {
 async function updateAccount(req, res, next) {
   try {
     const account = req.body;
-    const data = JSON.parse(await readFile(global.filename));
-
-    const index = data.accounts.findIndex((a) => a.id === account.id);
 
     if (!account.id || !account.name || account.balance == null) {
       throw new Error("ID, Name e Balance são obrigatórios");
     }
-
-    if (index === -1) {
-      throw new Error("Registro não encontrado");
-    }
-
-    data.accounts[index].name = account.name;
-    data.accounts[index].balance = account.balance;
-
-    await writeFile(global.filename, JSON.stringify(data, null, 2));
-
-    res.send(account);
+   
+    res.send(await AccountService.updateAccount(account));
     global.loggers.info(`${req.method} ${JSON.stringify(account)}`);
   } catch (err) {
     next(err);
   }
 }
 
-async function updateBalance(req, res, next){
+async function updateBalance(req, res, next) {
   try {
     const account = req.body;
-    const data = JSON.parse(await readFile(global.filename));
-
-    const index = data.accounts.findIndex((a) => a.id === account.id);
-
     if (!account.id || account.balance == null) {
       throw new Error("ID e Balance são obrigatórios");
     }
-
-    if (index === -1) {
-      throw new Error("Registro não encontrado");
-    }
-
-    data.accounts[index].balance = account.balance;
-
-    await writeFile(global.filename, JSON.stringify(data, null, 2));
     global.loggers.info(`${req.method} ${JSON.stringify(account)}`);
-    res.send(data.accounts[index]);
+    res.send(await AccountService.updateBalance(account));
   } catch (err) {
     next(err);
   }
 }
-
 
 export default {
   createAccount,
@@ -126,5 +78,5 @@ export default {
   getAccountsId,
   deleteAccount,
   updateAccount,
-  updateBalance
+  updateBalance,
 };
